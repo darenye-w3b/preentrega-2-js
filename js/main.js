@@ -8,86 +8,116 @@ function crearLibro(titulo, autor) {
 }
 
 // Función para agregar un libro a la biblioteca
-function agregarLibro(biblioteca, libro) {
-    biblioteca.push(libro);
+function agregarLibro() {
+    const titulo = document.getElementById('titulo').value;
+    const autor = document.getElementById('autor').value;
+
+    if (titulo && autor) {
+        const nuevoLibro = crearLibro(titulo, autor);
+        biblioteca.push(nuevoLibro);
+        guardarEnLocalStorage();
+        mostrarBiblioteca();
+    } else {
+        alert('Por favor, ingrese el título y el autor del libro.');
+    }
 }
 
 // Función para mostrar todos los libros en la biblioteca
-function mostrarBiblioteca(biblioteca) {
-    console.log("Biblioteca:");
+function mostrarBiblioteca() {
+    const resultadoDiv = document.getElementById('resultado');
+    resultadoDiv.innerHTML = "<h2>Biblioteca:</h2>";
+
     biblioteca.forEach((libro, index) => {
-        console.log(`${index + 1}. Título: ${libro.titulo}, Autor: ${libro.autor}, Prestado: ${libro.prestado ? 'Sí' : 'No'}`);
+        const infoLibro = document.createElement('p');
+        infoLibro.textContent = `${index + 1}. Título: ${libro.titulo}, Autor: ${libro.autor}, Prestado: ${libro.prestado ? 'Sí' : 'No'}`;
+        
+        // Agrega un botón para cambiar el estado del libro
+        const cambiarEstadoButton = document.createElement('button');
+        cambiarEstadoButton.textContent = libro.prestado ? 'Devolver' : 'Prestar';
+        cambiarEstadoButton.addEventListener('click', function () {
+            cambiarEstadoLibro(index);
+        });
+
+        infoLibro.appendChild(cambiarEstadoButton);
+
+        resultadoDiv.appendChild(infoLibro);
     });
 }
 
 // Función para mostrar libros según su estado de préstamo
-function mostrarLibrosPorEstado(biblioteca, prestado) {
-    const librosFiltrados = biblioteca.filter(libro => libro.prestado === prestado);
+function mostrarLibrosPorEstado() {
+    const estadoSeleccionado = document.getElementById('filtrarEstado').value;
+    const resultadoDiv = document.getElementById('resultado');
+    resultadoDiv.innerHTML = "";
+
+    let librosFiltrados = [];
+
+    switch (estadoSeleccionado) {
+        case 'prestados':
+            librosFiltrados = biblioteca.filter(libro => libro.prestado);
+            break;
+        case 'disponibles':
+            librosFiltrados = biblioteca.filter(libro => !libro.prestado);
+            break;
+        default:
+            librosFiltrados = biblioteca;
+    }
 
     librosFiltrados.forEach((libro, index) => {
-        console.log(`${index + 1}. Título: ${libro.titulo}, Autor: ${libro.autor}`);
+        const infoLibro = document.createElement('p');
+        infoLibro.textContent = `${index + 1}. Título: ${libro.titulo}, Autor: ${libro.autor}`;
+        resultadoDiv.appendChild(infoLibro);
     });
 }
 
-// Función para prestar un libro
-function prestarLibro(biblioteca, indiceLibro) {
+// Función para cambiar el estado de un libro (prestado/devuelto)
+function cambiarEstadoLibro(indiceLibro) {
     const libro = biblioteca[indiceLibro];
 
     if (libro) {
-        if (!libro.prestado) {
-            libro.prestado = true;
-            return `Libro "${libro.titulo}" prestado.`;
-        } else {
-            return `El libro "${libro.titulo}" ya está prestado.`;
-        }
+        libro.prestado = !libro.prestado; // Cambia el estado
+
+        guardarEnLocalStorage();
+        mostrarBiblioteca();
     } else {
-        return "No se encontró el libro en la biblioteca.";
+        alert("No se encontró el libro en la biblioteca.");
     }
 }
 
-
-const biblioteca = [];
-
-agregarLibro(biblioteca, crearLibro("Cien años de soledad", "Gabriel García Márquez"));
-agregarLibro(biblioteca, crearLibro("1984", "George Orwell"));
-agregarLibro(biblioteca, crearLibro("El señor de los anillos", "J.R.R. Tolkien"));
-agregarLibro(biblioteca, crearLibro("Orgullo y Prejuicio", "Jane Austen"));
-agregarLibro(biblioteca, crearLibro("El Resplandor", "Stephen King"));
-agregarLibro(biblioteca, crearLibro("El Alquimista", "Paulo Coelho"));
-agregarLibro(biblioteca, crearLibro("Moby-Dick", "Herman Melville"));
-agregarLibro(biblioteca, crearLibro("El Marciano", "Andy Weir"));
-agregarLibro(biblioteca, crearLibro("El Arte de la Guerra", "Sun Tzu"));
-agregarLibro(biblioteca, crearLibro("Harry Potter y la piedra filosofal", "J.K. Rowling"));
-agregarLibro(biblioteca, crearLibro("El Gran Gatsby", "F. Scott Fitzgerald"));
-agregarLibro(biblioteca, crearLibro("Crimen y castigo", "Fyodor Dostoevsky"));
-agregarLibro(biblioteca, crearLibro("El Hobbit", "J.R.R. Tolkien"));
-
-prestarLibro(biblioteca, 0);
-prestarLibro(biblioteca, 3);
-prestarLibro(biblioteca, 5);
-prestarLibro(biblioteca, 7);
-prestarLibro(biblioteca, 10);
-
-
-const opcionUsuario = prompt("¿Qué deseas visualizar? (biblioteca/prestados/disponibles)");
-
-if (opcionUsuario) {
-    if (opcionUsuario.toLowerCase() === "biblioteca") {
-        // Mostrar la biblioteca completa
-        console.log("\nTodos los libros en la biblioteca:");
-        mostrarBiblioteca(biblioteca);
-    } else if (opcionUsuario.toLowerCase() === "prestados") {
-        // Mostrar solo libros prestados
-        console.log("\nLibros prestados:");
-        mostrarLibrosPorEstado(biblioteca, true);
-    } else if (opcionUsuario.toLowerCase() === "disponibles") {
-        // Mostrar solo libros disponibles
-        console.log("\nLibros disponibles:");
-        mostrarLibrosPorEstado(biblioteca, false);
-    } else {
-        console.log("\nOpción no válida. Debes ingresar 'biblioteca', 'prestados' o 'disponibles'.");
-    }
-} else {
-    console.log("\nNo ingresaste ninguna opción.");
+// Función para guardar la biblioteca en el almacenamiento local
+function guardarEnLocalStorage() {
+    localStorage.setItem('biblioteca', JSON.stringify(biblioteca));
 }
+
+// Función para cargar la biblioteca desde el almacenamiento local
+function cargarDesdeLocalStorage() {
+    const bibliotecaGuardada = localStorage.getItem('biblioteca');
+    if (bibliotecaGuardada) {
+        biblioteca = JSON.parse(bibliotecaGuardada);
+        mostrarBiblioteca();
+    }
+}
+
+// Inicializar la biblioteca al cargar la página
+let biblioteca = [];
+cargarDesdeLocalStorage();
+
+// Detección de eventos al presionar Enter en los campos de texto
+document.getElementById('titulo').addEventListener('keyup', function (event) {
+    if (event.key === 'Enter') {
+        agregarLibro();
+    }
+});
+
+document.getElementById('autor').addEventListener('keyup', function (event) {
+    if (event.key === 'Enter') {
+        agregarLibro();
+    }
+});
+
+// Detección de eventos al cambiar la opción de filtrado
+document.getElementById('filtrarEstado').addEventListener('change', function () {
+    mostrarLibrosPorEstado();
+});
+
 
