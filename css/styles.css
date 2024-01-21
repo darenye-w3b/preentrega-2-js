@@ -1,31 +1,108 @@
-body{
+body {
     background-image: url(./../assets/biblioteca.jpg);
     font-family: Arial, sans-serif;
     margin: 20px;
+    transition: background-color 0.5s, color 0.5s; /* Agregamos una transición suave */
+}
+
+body.modo-oscuro {
+    background-color: #333; /* Fondo oscuro en modo oscuro */
+    color: #fff; /* Texto claro en modo oscuro */
+}
+
+.dark {
+    text-align: center;
+    background-color: #fff;
+}
+
+body.modo-oscuro .dark{
+    background-color: #444;
 }
 
 label {
     margin-right: 10px;
-    }
+    color: #333; /* Texto oscuro por defecto */
+}
 
 input, select, button {
     margin-bottom: 10px;
-    }
+    background-color: #fff; /* Fondo claro por defecto */
+    color: #333; /* Texto oscuro por defecto */
+}
 
 button {
     cursor: pointer;
-    }
+}
+
+body.modo-oscuro .texto{
+    color: #fff;
+}
 
 #resultado {
     margin-top: 20px;
-    }
+}
 
-
-.titulo{
+.titulo {
     background-color: white;
     text-align: center;
-} 
+}
 
-.contenedor-biblioteca{
+body.modo-oscuro .titulo {
+    background-color: #333; /* Fondo oscuro en modo oscuro */
+    color: #fff; /* Texto claro en modo oscuro */
+}
+
+.contenedor-biblioteca {
     background-color: white;
-} 
+    padding: 20px; /* Añadimos un padding para mejorar la apariencia */
+    border-radius: 8px; /* Añadimos bordes redondeados */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Añadimos una suave sombra */
+    color: #333; /* Texto oscuro por defecto */
+}
+
+.boton-galeria{
+    text-align: center;
+}
+
+.boton-galeria button {
+    border: 5px dotted #333;
+    padding: 5px;
+}
+
+.boton-galeria button:hover {
+    border: 5px solid #333;
+}
+
+body.modo-oscuro .boton-galeria button{
+    border: 5px dotted #c5ea4b
+}
+
+body.modo-oscuro .boton-galeria button:hover{
+    border: 5px solid #c5ea4b;
+}
+
+body.modo-oscuro .contenedor-biblioteca {
+    background-color: #333; /* Fondo oscuro en modo oscuro */
+    color: #fff; /* Texto claro en modo oscuro */
+}
+
+/* Añadimos estilos para el interruptor del modo oscuro */
+#modoOscuroSwitch {
+    margin-left: 10px;
+}
+
+/* Estilos adicionales para mejorar la apariencia de la biblioteca */
+#filtrarEstado, button {
+    padding: 8px;
+    border: 1px solid #333;
+    border-radius: 4px;
+}
+
+/* Estilos para el fondo de los input en modo oscuro */
+body.modo-oscuro input, body.modo-oscuro select {
+    background-color: #444;
+    color: #fff;
+}
+
+
+

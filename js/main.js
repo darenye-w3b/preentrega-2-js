@@ -1,4 +1,38 @@
-// Función para crear un libro
+// -------  BIBLIOTECA VIRTUAL --------
+const modoOscuroSwitch = document.getElementById('modoOscuroSwitch');
+const body = document.body;
+
+if (localStorage.getItem('modoOscuro') === 'activado') {
+    activarModoOscuro();
+}
+
+modoOscuroSwitch.addEventListener('change', () => {
+    if (modoOscuroSwitch.checked) {
+        activarModoOscuro();
+    } else {
+        desactivarModoOscuro();
+    }
+});
+
+// Activar el modo oscuro
+function activarModoOscuro() {
+    body.classList.add('modo-oscuro');
+    localStorage.setItem('modoOscuro', 'activado');
+}
+
+// Desactivar el modo oscuro
+function desactivarModoOscuro() {
+    body.classList.remove('modo-oscuro');
+    localStorage.setItem('modoOscuro', 'desactivado');
+}
+
+// DOM
+const tituloInput = document.getElementById('titulo');
+const autorInput = document.getElementById('autor');
+const resultadoDiv = document.getElementById('resultado');
+const filtrarEstadoSelect = document.getElementById('filtrarEstado');
+
+// Crear un libro
 function crearLibro(titulo, autor) {
     return {
         titulo,
@@ -7,10 +41,10 @@ function crearLibro(titulo, autor) {
     };
 }
 
-// Función para agregar un libro a la biblioteca
+// Agregar un libro a la biblioteca
 function agregarLibro() {
-    const titulo = document.getElementById('titulo').value;
-    const autor = document.getElementById('autor').value;
+    const titulo = tituloInput.value;
+    const autor = autorInput.value;
 
     if (titulo && autor) {
         const nuevoLibro = crearLibro(titulo, autor);
@@ -22,16 +56,14 @@ function agregarLibro() {
     }
 }
 
-// Función para mostrar todos los libros en la biblioteca
+// Mostrar todos los libros en la biblioteca
 function mostrarBiblioteca() {
-    const resultadoDiv = document.getElementById('resultado');
     resultadoDiv.innerHTML = "<h2>Biblioteca:</h2>";
 
     biblioteca.forEach((libro, index) => {
         const infoLibro = document.createElement('p');
         infoLibro.textContent = `${index + 1}. Título: ${libro.titulo}, Autor: ${libro.autor}, Prestado: ${libro.prestado ? 'Sí' : 'No'}`;
-        
-        // Agrega un botón para cambiar el estado del libro
+
         const cambiarEstadoButton = document.createElement('button');
         cambiarEstadoButton.textContent = libro.prestado ? 'Devolver' : 'Prestar';
         cambiarEstadoButton.addEventListener('click', function () {
@@ -39,15 +71,13 @@ function mostrarBiblioteca() {
         });
 
         infoLibro.appendChild(cambiarEstadoButton);
-
         resultadoDiv.appendChild(infoLibro);
     });
 }
 
-// Función para mostrar libros según su estado de préstamo
+// Mostrar libros según su estado de préstamo
 function mostrarLibrosPorEstado() {
-    const estadoSeleccionado = document.getElementById('filtrarEstado').value;
-    const resultadoDiv = document.getElementById('resultado');
+    const estadoSeleccionado = filtrarEstadoSelect.value;
     resultadoDiv.innerHTML = "";
 
     let librosFiltrados = [];
@@ -65,17 +95,25 @@ function mostrarLibrosPorEstado() {
 
     librosFiltrados.forEach((libro, index) => {
         const infoLibro = document.createElement('p');
-        infoLibro.textContent = `${index + 1}. Título: ${libro.titulo}, Autor: ${libro.autor}`;
+        infoLibro.textContent = `${index + 1}. Título: ${libro.titulo}, Autor: ${libro.autor}, Prestado: ${libro.prestado ? 'Sí' : 'No'}`;
+
+        const cambiarEstadoButton = document.createElement('button');
+        cambiarEstadoButton.textContent = libro.prestado ? 'Devolver' : 'Prestar';
+        cambiarEstadoButton.addEventListener('click', function () {
+            cambiarEstadoLibro(index);
+        });
+
+        infoLibro.appendChild(cambiarEstadoButton);
         resultadoDiv.appendChild(infoLibro);
     });
 }
 
-// Función para cambiar el estado de un libro (prestado/devuelto)
+// Cambiar el estado de un libro (prestado o devuelto)
 function cambiarEstadoLibro(indiceLibro) {
     const libro = biblioteca[indiceLibro];
 
     if (libro) {
-        libro.prestado = !libro.prestado; // Cambia el estado
+        libro.prestado = !libro.prestado; 
 
         guardarEnLocalStorage();
         mostrarBiblioteca();
@@ -84,12 +122,12 @@ function cambiarEstadoLibro(indiceLibro) {
     }
 }
 
-// Función para guardar la biblioteca en el almacenamiento local
+// Guardar la biblioteca en el almacenamiento local
 function guardarEnLocalStorage() {
     localStorage.setItem('biblioteca', JSON.stringify(biblioteca));
 }
 
-// Función para cargar la biblioteca desde el almacenamiento local
+// Cargar la biblioteca desde el almacenamiento local
 function cargarDesdeLocalStorage() {
     const bibliotecaGuardada = localStorage.getItem('biblioteca');
     if (bibliotecaGuardada) {
@@ -98,26 +136,73 @@ function cargarDesdeLocalStorage() {
     }
 }
 
-// Inicializar la biblioteca al cargar la página
-let biblioteca = [];
-cargarDesdeLocalStorage();
+// FETCH y JSON
+fetch('js/package.json') 
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error al obtener el JSON. Código de estado: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        biblioteca = data.libros;
+        mostrarBiblioteca();
+    })
+    .catch(error => {
+        console.error('Error en la solicitud FETCH:', error.message);
+    });
 
-// Detección de eventos al presionar Enter en los campos de texto
-document.getElementById('titulo').addEventListener('keyup', function (event) {
-    if (event.key === 'Enter') {
-        agregarLibro();
-    }
-});
+// Botón para abrir la galería de libros
+const abrirGaleriaButton = document.getElementById('abrirGaleriaButton');
+abrirGaleriaButton.addEventListener('click', mostrarGaleria);
 
-document.getElementById('autor').addEventListener('keyup', function (event) {
-    if (event.key === 'Enter') {
-        agregarLibro();
-    }
-});
-
-// Detección de eventos al cambiar la opción de filtrado
-document.getElementById('filtrarEstado').addEventListener('change', function () {
+filtrarEstadoSelect.addEventListener('change', function () {
     mostrarLibrosPorEstado();
 });
+
+// Mostrar la galería de libros con Sweet Alert 2
+function mostrarGaleria() {
+    const galeriaHTML = generarHTMLGaleria();
+
+    Swal.fire({
+        title: 'Galería de libros',
+        html: galeriaHTML,
+        confirmButtonText: 'Cerrar',
+        width: '600px',
+    });
+}
+
+// Generar el HTML de la galería
+function generarHTMLGaleria() {
+    let galeriaHTML = '<div style="display: flex; flex-wrap: wrap;">';
+
+    biblioteca.forEach((libro, index) => {
+        galeriaHTML += `
+            <div style="margin: 10px; text-align: center;">
+                <img src="assets/${index + 1}.jpg" alt="${libro.titulo}" style="width: 150px; height: 200px;">
+                <p>${libro.titulo}</p>
+            </div>
+        `;
+    });
+
+    galeriaHTML += '</div>';
+
+    return galeriaHTML;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
